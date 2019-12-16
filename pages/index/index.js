@@ -7,7 +7,7 @@ function encodeAccount(pub) {
   let version = Buffer.from([0x01]);
   let v_pub = Buffer.concat([version, pub]);
   console.log("encodeAccount返回" + bs58check.encode(v_pub));
-  return "czr_";
+  return "czr_" + bs58check.encode(v_pub);
 }
 
 
@@ -873,6 +873,7 @@ ed25519.ready(function () {
 
 /* 封装Accounts类 */
 let Accounts = function (dev) {
+  console.log("Accounts dev", dev)
   if (dev) {
     //如果是测试环境
     this.COSTNUM = 256;
@@ -957,6 +958,7 @@ var accounts = new Accounts(false)
 
 accounts.create(123456).then(res => {
   console.log("创建账号收到结果\n", res);//res.account
+  console.log(JSON.stringify(res))
 }).catch(err => {
   console.log("err===>", err);
 });
