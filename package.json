@@ -19,8 +19,14 @@
   "homepage": "https://github.com/anbang/weapp-eth-wallet#readme",
   "dependencies": {
     "argon2-wasm-pro": "^1.1.0",
+    "browser-crypto": "^1.0.1",
     "bs58check": "^2.1.2",
     "buffer": "^5.4.3",
-    "ed25519-wasm-pro": "^1.1.1"
+    "crypto-aes-ctr": "^2.0.0",
+    "crypto-browserify": "^3.12.0",
+    "crypto-js": "^3.1.9-1",
+    "ed25519-wasm-pro": "^1.1.1",
+    "hash.js": "^1.1.7",
+    "secure-keys-dc": "^1.2.0"
   }
 }

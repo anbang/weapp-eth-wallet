@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <script>
+        (async () => {
+
+            // [93, 11, 94, 137, 135, 115, 103, 250, 150, 221, 143, 162, 66, 135, 42, 109, 55, 231, 194, 28, 141, 237, 113, 163, 75, 155, 184, 74, 227, 60, 10, 170]
+
+            //  [60, 233, 242, 109, 39, 76, 205, 254, 249, 47, 49, 10, 73, 235, 131, 68]
+
+            // let crypto = require('crypto')
+            let crypto = require('crypto-browserify')
+            let argon2 = require('argon2-wasm-pro')
+            let edPro = require('ed25519-wasm-pro')
+            async function createAccount(password, COSTNUM) {
+
+                let kdf_salt = crypto.randomBytes(16);
+                let iv = crypto.randomBytes(16);
+                let privateKey = crypto.randomBytes(32);
+
+                //password hashing
+                let kdf_option = {
+                    pass: password.toString(),
+                    salt: kdf_salt,
+                    type: argon2.argon2id,
+                    time: 1,
+                    mem: COSTNUM,
+                    parallelism: 1,
+                    hashLen: 32,
+
+                    // raw: true,
+                    // version: 0x13
+                };
+                try {
+                    let derivePwd = await argon2.hash(kdf_option);
+                    //加密私钥
+                    console.log("argon2------------+", crypto.createCipheriv)
+                    console.log("derivePwd", derivePwd)
+
+                    let cipher = crypto.createCipheriv("aes-256-ctr", Buffer.from(derivePwd.hash.buffer), iv);//加密方法aes-256-ctr
+
+
+                    console.log('-------')
+                    console.log(cipher)
+                    console.log('-------')
+
+                    let ciphertext = Buffer.concat([cipher.update(privateKey), cipher.final()]);
+                    let promise = new Promise(function (resolve, reject) {
+                        try {
+                            // 生成公钥
+                            edPro.ready(function () {
+                                const keypair = edPro.createKeyPair(privateKey)
+                                let publicKey = Buffer.from(keypair.publicKey.buffer);
+
+                                //clear privateKey for security, any better methed?
+                                crypto.randomFillSync(Buffer.from(derivePwd.hash.buffer));
+                                crypto.randomFillSync(privateKey);
+
+                                let accFile = {
+                                    account: (publicKey),
+                                    kdf_salt: kdf_salt.toString('hex').toUpperCase(),
+                                    iv: iv.toString('hex').toUpperCase(),
+                                    ciphertext: ciphertext.toString('hex').toUpperCase()
+                                }
+                                resolve(accFile)
+                            })
+                        } catch (e) {
+                            reject(e)
+                        }
+                    });
+                    return promise;
+                } catch (err) {
+                    throw err;
+                }
+            }
+
+            createAccount(12345678, 256).then(data => {
+                console.log(data)
+            })
+        })()
+    </script>
+</body>
+
+</html>
