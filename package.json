@@ -1,0 +1,26 @@
+{
+  "name": "weapp-eth-wallet",
+  "version": "1.0.0",
+  "description": "微信小程序版本的以太坊钱包",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anbang/weapp-eth-wallet.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anbang/weapp-eth-wallet/issues"
+  },
+  "homepage": "https://github.com/anbang/weapp-eth-wallet#readme",
+  "dependencies": {
+    "argon2-wasm-pro": "^1.1.0",
+    "bs58check": "^2.1.2",
+    "buffer": "^5.4.3",
+    "ed25519-wasm-pro": "^1.1.1"
+  }
+}
