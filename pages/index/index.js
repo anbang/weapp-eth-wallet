@@ -6,6 +6,7 @@ function encodeAccount(pub) {
   console.log('encodeAccount收到', pub)
   let version = Buffer.from([0x01]);
   let v_pub = Buffer.concat([version, pub]);
+  console.log("v_pub", v_pub)
   console.log("encodeAccount返回" + bs58check.encode(v_pub));
   return "czr_" + bs58check.encode(v_pub);
 }
@@ -343,8 +344,8 @@ var crypto = {
     // return (new crypto.WordArray.init(words, nBytes)).words;
   }
 }
-var RandomArray = crypto.randomBytes(32);
-console.log("Tartget RandomArray", RandomArray, RandomArray.length)
+// var RandomArray = crypto.randomBytes(32);
+// console.log("Tartget RandomArray", RandomArray, RandomArray.length)
 // 强随机结束
 
 // var crypto2 =require('crypto-browserify')
@@ -854,13 +855,13 @@ function Wrapper(lib) {
 
 var ed25519 = Wrapper(__ed25519wasm);
 console.log(ed25519)
-ed25519.ready(function () {
-  const prv = Buffer.from("0000000000000000000000000000000000000000000000000000000000000000", "hex");
-  const keys = ed25519.createKeyPair(prv)
-  console.log("3B6A27BCCEB6A42D62A3A8D02A6F0D73653215771DE243A63AC048A18B59DA29", Buffer.from(keys.publicKey.buffer).toString('hex').toUpperCase())
-  const keys2 = ed25519.createKeyPair(RandomArray)
-  console.log(keys2, Buffer.from(keys2.publicKey.buffer).toString('hex').toUpperCase())
-})
+// ed25519.ready(function () {
+//   const prv = Buffer.from("0000000000000000000000000000000000000000000000000000000000000000", "hex");
+//   const keys = ed25519.createKeyPair(prv)
+//   console.log("3B6A27BCCEB6A42D62A3A8D02A6F0D73653215771DE243A63AC048A18B59DA29", Buffer.from(keys.publicKey.buffer).toString('hex').toUpperCase())
+//   const keys2 = ed25519.createKeyPair(RandomArray)
+//   console.log(keys2, Buffer.from(keys2.publicKey.buffer).toString('hex').toUpperCase())
+// })
 // ed25519.ready(function () {
 //   console.log('********************')
 //   const keys2 = ed25519.createKeyPair(RandomArray)
@@ -882,17 +883,16 @@ let Accounts = function (dev) {
   }
 };
 async function createAccount(password, COSTNUM) {
-  let kdf_salt = crypto.randomBytes(16);
-  let iv = crypto.randomBytes(16);
-  let privateKey = crypto.randomBytes(32);
-
+  // let kdf_salt = crypto.randomBytes(16);
+  // let iv = crypto.randomBytes(16);
+  // let privateKey = crypto.randomBytes(32);
 
   //测试的
-  // let kdf_salt    = Buffer.from("AF8460A7D28A396C62D6C51620B87789", "hex");
-  // let iv          = Buffer.from("A695DDC35ED9F3183A09FED1E6D92083", "hex");
-  // let privateKey  = Buffer.from("5E844EE4D2E26920F8B0C4B7846929057CFCE48BF40BA269B173648999630053", "hex");
+  let kdf_salt = Buffer.from("AF8460A7D28A396C62D6C51620B87789", "hex");
+  let iv = Buffer.from("A695DDC35ED9F3183A09FED1E6D92083", "hex");
+  let privateKey = Buffer.from("5E844EE4D2E26920F8B0C4B7846929057CFCE48BF40BA269B173648999630053", "hex");
 
-  // console.log("私钥",privateKey.toString('hex'));
+  console.log("私钥[OK]", privateKey.toString('hex'));
 
   //password hashing
   let kdf_option = {
@@ -907,20 +907,38 @@ async function createAccount(password, COSTNUM) {
     // raw: true,
     // version: 0x13
   };
+  // console.log('kdf_option[ok]',kdf_option)
+
   try {
     let derivePwd = await argon2.hash(kdf_option);
     //加密私钥
     // console.log("argon2",crypto)
     console.log("derivePwd", derivePwd)
-    console.log('-------')
-    console.log(Buffer.from(derivePwd.hash.buffer), iv)
-    console.log('-------')
+    console.log('------------------------------------------------------')
+    function toBuffer(ab) {
+      var buf = new Buffer(ab.byteLength);
+      var view = new Uint8Array(ab);
+      for (var i = 0; i < buf.length; ++i) {
+        buf[i] = view[i];
+      }
+      return buf;
+    }
+    // console.log('derivePwd',Buffer.from(derivePwd.hash.buffer))
+    // console.log('derivePwd',derivePwd.hash.buffer)
+    // console.log('toBuffer',toBuffer(derivePwd.hash))
+    // console.log('iv',iv)
+    // console.log('-------')
     // var cryptoAesCtr = require("crypto-aes-ctr");
+
 
     let cipher = crypto3.createCipheriv("aes-256-ctr", Buffer.from(derivePwd.hash.buffer), iv);//加密方法aes-256-ctr
     // let cipher = argon3.createStream(Buffer.from(derivePwd.hash.buffer), iv);//加密方法aes-256-ctr
-    console.log('cipher', cipher)
     let ciphertext = Buffer.concat([cipher.update(privateKey), cipher.final()]);
+    // console.log('cipher', cipher)
+    // console.log('ciphertext[ok]', ciphertext)
+    // console.log('ciphertext.toString[ok]', ciphertext.toString('hex'))
+    // console.log('ciphertext.toUpperCase[ok]', ciphertext.toString('hex').toUpperCase())
+
     let promise = new Promise(function (resolve, reject) {
       try {
         // 生成公钥
@@ -931,6 +949,9 @@ async function createAccount(password, COSTNUM) {
           //clear privateKey for security, any better methed?
           // crypto.randomFillSync(Buffer.from(derivePwd.hash.buffer));
           // crypto.randomFillSync(privateKey);
+
+          
+          console.log("publicKey???",publicKey)
 
           let accFile = {
             account: encodeAccount(publicKey),
@@ -954,7 +975,7 @@ Accounts.prototype.create = function (password) {
   return createAccount(password, this.COSTNUM);
 };
 
-var accounts = new Accounts(false)
+var accounts = new Accounts(true)
 
 accounts.create(123456).then(res => {
   console.log("创建账号收到结果\n", res);//res.account
