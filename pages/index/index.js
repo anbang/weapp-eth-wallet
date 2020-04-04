@@ -33,7 +33,7 @@ console.log('文件内容：', fileInfo);
 
   const createAcc = await accounts.create(123456);
   // console.log('创建账号:', createAcc.account === testfile.account)
-  console.log('创建账号:\n', createAcc)
+  console.log('创建账号:\n', JSON.stringify(createAcc))
 
   const valiAcc = await accounts.validateAccount(createAcc, '123456');
   console.log('验证 创建账号:', valiAcc ? ("通过 " + createAcc.account) : "未通过")
